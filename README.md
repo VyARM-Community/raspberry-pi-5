@@ -238,11 +238,46 @@ Actual connectivity also depends on the SIM carrier, APN, regional firmware, and
 
 ## Updates
 
-This Raspberry Pi 5 image currently supports **fresh installation and recovery using the `.img.xz` image**. Keep a configuration backup and your previous boot medium before testing a new image.
+### Update through the board channel
 
-The Pi boots through its EEPROM/Boot ROM and native firmware, loading the kernel, initramfs and Device Tree from the FAT boot partition. Safe in-place updates require synchronization of those files with the selected VyOS system image. That update path is not yet released for this board.
+**On a fresh installation, the Raspberry Pi 5 update channel is configured automatically during first-boot setup.** You do not need to enter an update URL. No automatic image installation is enabled.
 
-Do not use `add system image latest` or the builder's experimental ISO for this image yet. No automatic update channel is configured. This section will be updated once the native update path has been implemented and hardware-tested.
+To install the latest image, run this command in operational mode:
+
+```text
+add system image latest
+```
+
+Follow the installer prompts, retain your configuration and previous image, then reboot when ready as described below.
+
+The channel becomes usable when the first release containing `image-version.json` has been published. This feed points to the matching Raspberry Pi 5 ISO with additional network support.
+
+### Update using a specific ISO
+
+Alternatively, copy the full HTTPS download link of the desired `.iso` from the [Releases page](https://github.com/VyARM-Community/raspberry-pi-5/releases):
+
+```text
+add system image https://github.com/VyARM-Community/raspberry-pi-5/releases/download/RELEASE_TAG/vyos-VERSION-raspberry-pi-5-network.iso
+```
+
+Replace `RELEASE_TAG` and `VERSION` with the actual release values. Use the `.iso` for system-image updates; `.img.xz` is intended for initial installation or recovery.
+
+### Configuration, reboot and rollback
+
+1. Save your current configuration with `configure`, `save`, then `exit`, and keep a separate backup of `/config/config.boot`.
+2. Run one of the installation commands above and follow its prompts. Choose to retain the current configuration when requested.
+3. Keep the previous working image as a fallback. Use `show system image` to inspect the installed images and boot selection.
+4. Reboot when ready with `reboot`.
+5. Check networking and the configured services after boot.
+
+To select a retained image for the next boot, use its exact name from `show system image`:
+
+```text
+set system image default-boot IMAGE_NAME
+reboot
+```
+
+These are operational-mode commands. The Raspberry Pi 5 image uses native Raspberry Pi EEPROM/firmware and the FAT boot partition. Selecting an image updates the boot configuration to its matching kernel, initramfs and Device Tree; no GRUB menu is used.
 
 ---
 
@@ -257,7 +292,7 @@ vyos-VERSION-raspberry-pi-5-network.img.xz
 vyos-VERSION-raspberry-pi-5-network.img.xz.sha256
 ```
 
-Use the compressed `.img.xz` for initial installation. Only initial-installation images are published here until the Pi update path is ready.
+Use the compressed `.img.xz` for initial installation. A matching `.iso` and `.iso.sha256` are provided for supported system-image updates.
 
 See [CHANGELOG.md](CHANGELOG.md) for the changes in each release.
 
